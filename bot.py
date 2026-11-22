@@ -9,9 +9,12 @@ from torch import optim
 import nltk 
 import numpy as np
 
+import math
+
 import os
 import json
 import random
+
 
 
 class Model(nn.Module):
@@ -39,3 +42,41 @@ class Model(nn.Module):
         x = self.out(x)
 
         return x
+
+class Predictor():
+    def __init__(self, data_location):
+   
+        self.my_df = pd.read_csv(data_location)
+
+        self.my_df["commit_cadence"] = self.my_df["commit_cadence"].replace("frequent", 0)
+        self.my_df["commit_cadence"] = self.my_df["commit_cadence"].replace("daily", 1)
+        self.my_df["commit_cadence"] = self.my_df["commit_cadence"].replace("sporadic", 2)
+
+        bool_columns = self.my_df.select_dtypes(include="bool").columns
+        self.my_df[bool_columns] = self.my_df[bool_columns].astype(int)
+
+        # Will be predicting log_hours
+        print(self.my_df)
+
+    @classmethod
+    def convert_log_hours_to_hours(cls, log_hours):
+        return math.e ** log_hours
+
+    def train():
+        
+
+Predictor("train.csv")
+"""
+
+Values changed:
+* commit_cadence
+    - 0 = frequent
+    - 1 = daily
+    - 2 = sporadic
+
+* any column with booleans:
+    - 0 = false
+    - 1 = true
+
+"""
+        
