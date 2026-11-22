@@ -18,7 +18,7 @@ import random
 
 
 class Model(nn.Module):
-    def __init__(self, input_neurons, output_neurons, l1, l2, l3):
+    def __init__(self, input_neurons, output_neurons, l1 = 64, l2 = 32, l3 = 16):
         super(Model, self).__init__()
 
         self.fc1 == nn.Linear(input_neurons, l1)
@@ -45,8 +45,15 @@ class Model(nn.Module):
 
 class Predictor():
     def __init__(self, data_location):
+
+        self.state_date = []
    
         self.my_df = pd.read_csv(data_location)
+
+        self.X = None
+        self.y = None
+
+        self.model = None
 
         self.my_df["commit_cadence"] = self.my_df["commit_cadence"].replace("frequent", 0)
         self.my_df["commit_cadence"] = self.my_df["commit_cadence"].replace("daily", 1)
@@ -55,6 +62,10 @@ class Predictor():
         bool_columns = self.my_df.select_dtypes(include="bool").columns
         self.my_df[bool_columns] = self.my_df[bool_columns].astype(int)
 
+        wanted_columns = ["number_of_commits", "active_commit_day", "project_span_days", "commit_cadence", "pct_commits_weekend", "is_forked_from_template", "author_prior_projects", "author_account_age_years"]
+
+        self.my_df = self.my_df.loc[:, wanted_columns]
+
         # Will be predicting log_hours
         print(self.my_df)
 
@@ -62,8 +73,39 @@ class Predictor():
     def convert_log_hours_to_hours(cls, log_hours):
         return math.e ** log_hours
 
-    def train():
+    @classmethod
+    def combine_state_data(cls, number_of_commits, active_commit_day, project_span_days, commit_cadence, pct_commits_weekend, is_forked_from_template, author_prior_projects, author_account_age_years):
+        entry = {
+            "num_commits": number_of_commits,
+            "active_commit_days": active_commit_day,
+            "project_span_days": project_span_days,
+            "commit_cadence": commit_cadence,
+            "pct_commits_weekend": pct_commits_weekend,
+            "is_forked_from_template": is_forked_from_template,
+            "author_prior_projects": author_prior_projects,
+            "author_account_age_years": author_account_age_years
+
+        }
+
+        return list(entry.values())
+
+    def prepare_date(self):
+        for col in self.my_df.column:
+            
+
+    def train(self, batch_size, lr, epochs):
+        X_tensor = torch.tensor(self.X, dtype=torch.float32) # input array
+        y_tensor = torch.tensor(self.y, dtype=torch.float32) # output for log_hours
+
         
+
+        dataset = TensorDataset(X_tensor, y_tensor)
+        loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+
+        self.model = Model(len(self.my_df.columns))
+
+
+
 
 Predictor("train.csv")
 """
